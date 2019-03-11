@@ -1,5 +1,6 @@
 language: c++
 os:
+  - windows
   - linux
   - osx
 compiler:
@@ -15,11 +16,26 @@ before_install:
       fi
     fi
 before_script:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      choco install visualstudio2017-workload-nativedesktop
+    fi
   - mkdir build
   - cd build
-  - cmake ..
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      cmake .. -GNinja  -DCMAKE_BUILD_TYPE=Release -DCMAKE_GENERATOR_PLATFORM=x64
+    else
+      cmake ..
+    fi
+
 script:
-  - make
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      cmake --build . --config Release
+    else
+      make
+    fi
   - test/run-tests
 
 matrix:
